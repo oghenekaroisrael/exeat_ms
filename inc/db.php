@@ -1241,10 +1241,10 @@ error_reporting(0);
 					$_SESSION['userSession'] = $user_id;
 					$_SESSION['userRole'] = $role;
                     if($role == 'student'){
-						$page = "student/dashboard.php";
+						$page = "student/index.php";
 						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
 					}else if($role == 'super-admin'){
-						$page = "admin/dashboard.php";
+						$page = "admin/index.php";
 						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
 					}else{
 						$result = "<div class='alert alert-danger'>Your Role is incorrect Kindly login accordingly !</div>";
