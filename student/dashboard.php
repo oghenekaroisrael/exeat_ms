@@ -1,3 +1,17 @@
+<?php
+ob_start();
+session_start(); 
+$active_page = "dashboard";
+// Include database class
+include_once '../inc/db.php';
+if(!isset($_SESSION['userSession'])){
+  header("Location: ../index");
+  exit;
+}elseif (isset($_SESSION['userSession'])){
+  $user_id = $_SESSION['userSession'];
+  $fullname = Database::getInstance()->get_fullname_by_id($user_id);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include('inc/header.php');?>
