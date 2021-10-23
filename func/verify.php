@@ -26,8 +26,8 @@
 		case 'exeatApplication':
 			exeatApplication();
 			break;
-		case 'alterLoanStatus':
-			alterLoanStatus();
+		case 'alterStatus':
+			alterStatus();
 			break;
 		case 'alterSavingsStatus':
 			alterSavingsStatus();
@@ -347,19 +347,19 @@
 		}
 	}
 
-	function alterLoanStatus(){
+	function alterStatus(){
 		$uperror = '';
 		
-		$loan_id = $_POST['loan_id'];
+		$app_id = $_POST['app_id'];
 		$user = $_POST['user'];
 		$status = $_POST['status'];
 
-			if (empty($loan_id)) {
+			if (empty($app_id)) {
 				$uperror = '<div class="alert alert-danger">
 					<strong>Warning!</strong> Please Reload Page.
 				</div>';
 			}else{
-				echo Database::getInstance()->alterLoanStatus($loan_id,$status,$user);
+				echo Database::getInstance()->alterStatus($app_id,$status,$user);
 			}			
 	}
 

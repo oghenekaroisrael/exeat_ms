@@ -9,7 +9,6 @@ if(!isset($_SESSION['userSession'])){
   exit;
 }elseif (isset($_SESSION['userSession'])){
   $user_id = $_SESSION['userSession'];
-  $fullname = Database::getInstance()->get_fullname_by_id($user_id);
 }
 ?>
 <!DOCTYPE html>

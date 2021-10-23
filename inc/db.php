@@ -1262,26 +1262,28 @@ class Database
 		}
 	}
 
-	public function alterSavingsStatus($saving_id, $status, $user)
+	public function alterStatus($app_id,$status,$user)
 	{
 		try {
-			$stmt = $this->db->prepare("UPDATE savings SET status = ?, altered_by =?, date_altered = NOW() WHERE id = ?");
-			$stmt->execute([$status, $user, $saving_id]);
+			$stmt = $this->db->prepare("UPDATE Applications SET `status` = ?, alteredBy = ?, date_altered = NOW() WHERE applicationID = ?");
+			$stmt->execute([$status, $user,$app_id]);
 			$stmt = null;
 			if ($status == 1) {
-				$msg = "Savings Payment Acknowledged";
-				$link = "savings";
-				$to = $this->get_name_from_id('user_id', 'savings', 'id', $saving_id);
-				$stmt = $this->db->prepare("INSERT INTO notifications(`message`,link,user_to,user_from,`status`,date_added) 
+				$msg = "Application Approved";
+				$link = "viewApplication?id=".$app_id;
+				$to = $this->get_name_from_id('studentID', 'Applications', 'ApplicationID', $app_id);
+				$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
 				VALUES (?,?,?,'admin',0,NOW())");
 				$stmt->execute([$msg, $link, $to]);
-			} else {
-				$msg = "Savings Payment Not Seen";
-				$link = "savings";
-				$to = $this->get_name_from_id('user_id', 'savings', 'id', $saving_id);
-				$stmt = $this->db->prepare("INSERT INTO notifications(`message`,link,user_to,user_from,`status`,date_added) 
+				$stmt = null;
+			} else if($status == 2) {
+				$msg = "Application Declined";
+				$link = "viewApplication?id=".$app_id;
+				$to = $this->get_name_from_id('studentID', 'Applications', 'ApplicationID', $app_id);
+				$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
 				VALUES (?,?,?,'admin',0,NOW())");
 				$stmt->execute([$msg, $link, $to]);
+				$stmt = null;
 			}
 			return "Done";
 		} catch (PDOException $e) {

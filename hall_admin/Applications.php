@@ -96,16 +96,16 @@ $hall_id = 1;
                                                     <td>
                                                         <?php
                                                             if ($record['status'] == 0) { ?>
-                                                        <span class="badge badge-danger">Pending</span>
-                                                        <?php } else if ($record['status'] == 1) { ?>
-                                                        <span class="badge badge-success">Pending</span>
-                                                        <?php } else { ?>
                                                         <span class="badge badge-warning">Pending</span>
+                                                        <?php } else if ($record['status'] == 1) { ?>
+                                                        <span class="badge badge-success">Approved</span>
+                                                        <?php } else { ?>
+                                                        <span class="badge badge-danger">Declined</span>
                                                         <?php  }
                                                             ?>
                                                     </td>
                                                     <td>
-                                                        <a href="viewExtension?id=<?php echo $record['applicationID']; ?>"
+                                                        <a href="viewApplication?id=<?php echo $record['applicationID']; ?>"
                                                             class="btn btn-primary">View</a>
                                                     </td>
                                                 </tr>

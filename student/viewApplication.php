@@ -52,7 +52,14 @@ if(!isset($_SESSION['userSession'])){
                   ?>
                   <div class="row">
                       <div class="col-sm-12">
-                        <span class="badge badge-success right">Approved</span>
+                      <?php 
+                            if ($data['status'] == 0) {?>
+                            <span class="badge badge-warning right">Pending</span>
+                            <?php } else if($data['status'] == 1){?>
+                                <span class="badge badge-success right">Approved</span>
+                            <?php }else {?>
+                                <span class="badge badge-danger right">Declined</span>
+                            <?php } ?>
                       </div>
                     </div>
                     <div class="row">
