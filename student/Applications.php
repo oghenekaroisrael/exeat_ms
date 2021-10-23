@@ -1,3 +1,17 @@
+<?php
+ob_start();
+session_start(); 
+$active_page = "dashboard";
+// Include database class
+include_once '../inc/db.php';
+if(!isset($_SESSION['userSession'])){
+  header("Location: ../index");
+  exit;
+}elseif (isset($_SESSION['userSession'])){
+  $user_id = $_SESSION['userSession'];
+  $fullname = Database::getInstance()->get_fullname_by_id($user_id);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include('inc/header.php');?>
@@ -45,6 +59,9 @@
                         <th>
                           Status
                         </th>
+                        <th>
+                          Action
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
@@ -75,6 +92,9 @@
                             <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                           </div>
                         </td>
+                        <td>
+                          <a href="viewApplication" class="btn btn-primary">View</a>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -104,6 +124,5 @@
 
  <?php include('inc/footer.php');?>
 </body>
-
 </html>
 

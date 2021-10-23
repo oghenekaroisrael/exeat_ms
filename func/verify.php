@@ -23,8 +23,8 @@
 		case 'getLoan':
 			getLoan();
 			break;
-		case 'loanApplication':
-			loanApplication();
+		case 'exeatApplication':
+			exeatApplication();
 			break;
 		case 'alterLoanStatus':
 			alterLoanStatus();
@@ -297,30 +297,26 @@
 			echo Database::getInstance()->select_my_loans($user);		
 	}
 
-	function loanApplication(){
-		$amount = ucfirst(htmlspecialchars($_POST['loan_amount']));
-		$amount = ucfirst(stripslashes($_POST['loan_amount']));
-		$amount = ucfirst(trim($_POST['loan_amount']));
+	function exeatApplication(){
+		$type = ucfirst(htmlspecialchars($_POST['type']));
+		$type = ucfirst(stripslashes($_POST['type']));
+		$type = ucfirst(trim($_POST['type']));
 		
-		$purpose = ucfirst(htmlspecialchars($_POST['purpose']));
-		$purpose = ucfirst(stripslashes($_POST['purpose']));
-		$purpose = ucfirst(trim($_POST['purpose']));
+		$destination = ucfirst(htmlspecialchars($_POST['destination']));
+		$destination = ucfirst(stripslashes($_POST['destination']));
+		$destination = ucfirst(trim($_POST['destination']));
 
-		$rate = ucfirst(htmlspecialchars($_POST['rate']));
-		$rate = ucfirst(stripslashes($_POST['rate']));
-		$rate = ucfirst(trim($_POST['rate']));
+		$leaving = ucfirst(htmlspecialchars($_POST['leaving']));
+		$leaving = ucfirst(stripslashes($_POST['leaving']));
+		$leaving = ucfirst(trim($_POST['leaving']));
 		
-		$paccount = lcfirst(htmlspecialchars($_POST['preffered_account']));
-		$paccount = lcfirst(stripslashes($_POST['preffered_account']));
-		$paccount = lcfirst(trim($_POST['preffered_account']));
+		$returning = lcfirst(htmlspecialchars($_POST['returning']));
+		$returning = lcfirst(stripslashes($_POST['returning']));
+		$returning = lcfirst(trim($_POST['returning']));
 		
-		$sone = lcfirst(htmlspecialchars($_POST['suretyOne']));
-		$sone = lcfirst(stripslashes($_POST['suretyOne']));
-		$sone = lcfirst(trim($_POST['suretyOne']));
-		
-		$stwo = lcfirst(htmlspecialchars($_POST['suretyTwo']));
-		$stwo = lcfirst(stripslashes($_POST['suretyTwo']));
-		$stwo = lcfirst(trim($_POST['suretyTwo']));
+		$reason = lcfirst(htmlspecialchars($_POST['reason']));
+		$reason = lcfirst(stripslashes($_POST['reason']));
+		$reason = lcfirst(trim($_POST['reason']));
 
 		$user = $_POST['user'];
 
@@ -328,10 +324,8 @@
 
 		$validator = new FormValidator();
 						
-		$validator->addValidation("loan_amount","req","Please fill in Loan Amount");
-		$validator->addValidation("purpose","req","Please fill in Loan Purpose");
-		$validator->addValidation("suretyOne","req","Please select Surety");
-		$validator->addValidation("suretyTwo","req","Please select Surety");
+		$validator->addValidation("type","req","Please Select Exeat Type");
+		$validator->addValidation("reason","req","Please fill in Purpose");
 									
 		if($validator->ValidateForm()){
 			
@@ -340,7 +334,7 @@
 					<strong>Warning!</strong> '. $error .' 
 				</div>';
 			}else{
-				$insert = Database::getInstance()->loan_application($amount,$purpose, $rate, $paccount, $sone, $stwo, $user);
+				$insert = Database::getInstance()->exeat_application($type,$destination, $leaving, $returning, $reason, $user);
 				echo $insert;
 			}
 		} else {
