@@ -1,3 +1,18 @@
+<?php
+ob_start();
+session_start();
+$active_page = "dashboard";
+// Include database class
+include_once '../inc/db.php';
+// if (!isset($_SESSION['userSession'])) {
+//     header("Location: ../index");
+//     exit;
+// } elseif (isset($_SESSION['userSession'])) {
+//     $user_id = $_SESSION['userSession'];
+
+// }
+$hall_id = 1;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include('inc/header.php'); ?>
@@ -52,35 +67,49 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                <?php
+                                                $count = 1;
+                                                $list = Database::getInstance()->select_Applications($hall_id);
+                                                foreach ($list as $record) { ?>
                                                 <tr>
                                                     <td>
-                                                        1
+                                                        <?php echo $count++; ?>
                                                     </td>
                                                     <td>
-                                                        06-10-2021
+                                                        <?php echo $record['dateCreated']; ?>
                                                     </td>
                                                     <td>
-                                                        Lagos
+                                                        <?php echo $record['destination']; ?>
                                                     </td>
                                                     <td>
-                                                        Long
+                                                        <?php echo $record['leave_type']; ?>
                                                     </td>
                                                     <td>
-                                                        10-10-2021
+                                                        <?php echo $record['depature_date']; ?>
                                                     </td>
                                                     <td>
-                                                        21-10-2021
+                                                        <?php echo $record['return_date']; ?>
                                                     </td>
                                                     <td>
-                                                        Lorem ipsum.
+                                                        <?php echo $record['reason']; ?>
                                                     </td>
                                                     <td>
+                                                        <?php
+                                                            if ($record['status'] == 0) { ?>
+                                                        <span class="badge badge-danger">Pending</span>
+                                                        <?php } else if ($record['status'] == 1) { ?>
+                                                        <span class="badge badge-success">Pending</span>
+                                                        <?php } else { ?>
                                                         <span class="badge badge-warning">Pending</span>
+                                                        <?php  }
+                                                            ?>
                                                     </td>
                                                     <td>
-                                                        <a href="viewApplication" class="btn btn-primary">View</a>
+                                                        <a href="viewExtension?id=<?php echo $record['applicationID']; ?>"
+                                                            class="btn btn-primary">View</a>
                                                     </td>
                                                 </tr>
+                                                <?php } ?>
                                             </tbody>
                                         </table>
                                     </div>

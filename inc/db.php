@@ -520,6 +520,19 @@ class Database
 			echo 'Error: ' . $e->getMessage();
 		}
 	}
+	public function select_Applications($user_id)
+	{
+		try {
+			$que = $this->db->prepare("SELECT S.hall_id,A.destination AS destination, A.leave_type AS leave_type,A.applicationID AS applicationID, A.depatureDate as depature_date, A.returnDate as return_date, A.reason AS reason, A.status AS status ,A.dateCreated AS dateCreated FROM Students S LEFT JOIN Applications A ON S.id = A.studentID WHERE S.hall_id =? AND A.status IS NOT NULL;");
+			$que->execute([$user_id]);
+			$arr = $que->fetchAll();
+			return $arr;
+			$que = null;
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
 
 
 
@@ -1707,9 +1720,9 @@ class Database
 				$que3 = null;
 				$titlee = $title['name'];
 				$title = str_replace('_', ' ', $titlee); ?>
-				<h3><?php ucwords($title); ?></h3>
+<h3><?php ucwords($title); ?></h3>
 
-				<?php
+<?php
 				$stmt = $this->db->prepare("SELECT * FROM lab_temps WHERE label_id = ?");
 				$stmt->execute([$temp]);
 				$row = $stmt->fetchAll();
@@ -1720,18 +1733,19 @@ class Database
 					$name = str_replace('_', ' ', $name);
 					$name = ucwords($name);
 				?>
-					<div class="col-md-6">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="form-group">
-									<label><?php echo $name; ?></label>
-									<input type="text" class="form-control" name="<?php echo strtolower($name); ?>" placeholder="<?php echo $name; ?>">
-								</div>
-							</div>
-						</div>
-					</div>
+<div class="col-md-6">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label><?php echo $name; ?></label>
+                <input type="text" class="form-control" name="<?php echo strtolower($name); ?>"
+                    placeholder="<?php echo $name; ?>">
+            </div>
+        </div>
+    </div>
+</div>
 
-				<?php	}
+<?php	}
 			endforeach;
 		} catch (PDOException $e) {
 			echo 'Error: ' . $e->getMessage();
@@ -1847,53 +1861,58 @@ class Database
 				$name = str_replace('_', ' ', $name);
 				$name = ucwords($name);
 				?>
-				<div class="col-md-12">
-					<form id="<?php echo $tn_id; ?>">
-						<div class="row">
-							<div class="col-md-12">
-								<div class="form-group">
+<div class="col-md-12">
+    <form id="<?php echo $tn_id; ?>">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="form-group">
 
-									<p id="<?php echo $tn_id; ?>"> <?php echo $name; ?></p>
-									<a href="edit_temp_choose?id=<?php echo $tn_id; ?>" style="margin-bottom:10px; background:#1eb902 ! important; border-color:#1eb902  !important;" class="btn btn-primary pull-left btn-flat btblack" id="addre">Edit</a>
-									<a onclick="delf(<?php echo $tn_id; ?>,'<?php echo $name; ?>')" style="margin-bottom:10px;" class="btn btn-primary pull-left btn-flat btblack">Delete</a>
-								</div>
-							</div>
-						</div>
+                    <p id="<?php echo $tn_id; ?>"> <?php echo $name; ?></p>
+                    <a href="edit_temp_choose?id=<?php echo $tn_id; ?>"
+                        style="margin-bottom:10px; background:#1eb902 ! important; border-color:#1eb902  !important;"
+                        class="btn btn-primary pull-left btn-flat btblack" id="addre">Edit</a>
+                    <a onclick="delf(<?php echo $tn_id; ?>,'<?php echo $name; ?>')" style="margin-bottom:10px;"
+                        class="btn btn-primary pull-left btn-flat btblack">Delete</a>
+                </div>
+            </div>
+        </div>
 
-					</form>
-				</div>
-				<script type="text/javascript">
-					var s = jQuery.noConflict();
+    </form>
+</div>
+<script type="text/javascript">
+var s = jQuery.noConflict();
 
-					function delf(ID, name) {
-						s.notify({
-							icon: 'pe-7s-trash',
-							message: "Are you sure you want to delete <b>" + name + "</b> from templates ? </br><button type='button' class='btn pop-btn' onclick='delet(" + ID + ")'>Delete</button>"
-						}, {
-							type: 'danger',
-							timer: 100000
-						});
-					}
+function delf(ID, name) {
+    s.notify({
+        icon: 'pe-7s-trash',
+        message: "Are you sure you want to delete <b>" + name +
+            "</b> from templates ? </br><button type='button' class='btn pop-btn' onclick='delet(" + ID +
+            ")'>Delete</button>"
+    }, {
+        type: 'danger',
+        timer: 100000
+    });
+}
 
-					function delet(ID) {
-						var val = ID;
-						document.getElementById("load").style.display = "block";
-						s.ajax({
-							type: 'post',
-							url: '../func/del.php',
-							data: "val=" + val + '&ins=delTempp',
-							success: function(data) {
-								document.getElementById("load").style.display = "block";
-								if (data === 'Done') {
-									console.log(data);
-									location.reload();
-								} else {
-									jQuery('#get_det' + ID).html(data).show();
-								}
-							}
-						});
-					}
-				</script>
+function delet(ID) {
+    var val = ID;
+    document.getElementById("load").style.display = "block";
+    s.ajax({
+        type: 'post',
+        url: '../func/del.php',
+        data: "val=" + val + '&ins=delTempp',
+        success: function(data) {
+            document.getElementById("load").style.display = "block";
+            if (data === 'Done') {
+                console.log(data);
+                location.reload();
+            } else {
+                jQuery('#get_det' + ID).html(data).show();
+            }
+        }
+    });
+}
+</script>
 <?php	}
 		} catch (PDOException $e) {
 			echo 'Error: ' . $e->getMessage();
