@@ -103,12 +103,12 @@ class Database
 	public function get_fullname_by_id($id)
 	{
 		try {
-			$que = $this->db->prepare("SELECT surname, middle_name, first_name FROM users WHERE a_user_id = ?;");
+			$que = $this->db->prepare("SELECT lastName, middleName, firstName FROM Students WHERE id = ?;");
 			$que->execute([$id]);
 			$row = $que->fetch(PDO::FETCH_OBJ);
-			$lname = $row->surname;
-			$mname = $row->middle_name;
-			$fname = $row->first_name;
+			$lname = $row->lastName;
+			$mname = $row->middleName;
+			$fname = $row->firstName;
 			$fullname = ucwords($lname . " " . $mname . " " . $fname);
 			return $fullname;
 			$que = null;
@@ -279,7 +279,7 @@ class Database
 	//count notifications
 	public function count_notifications($user)
 	{
-		$stmt = $this->db->prepare("SELECT * FROM notifications WHERE status = 0 AND user_to = ? OR user_to = 'all' ");
+		$stmt = $this->db->prepare("SELECT * FROM Notifications WHERE status = 0 AND user_to = ? OR user_to = 'all' ");
 		$stmt->execute([$user]);
 		$count = $stmt->rowCount();
 		return $count;
@@ -458,7 +458,7 @@ class Database
 
 	public function count_all($table, $user_id)
 	{
-		$stmt = $this->db->prepare("SELECT COUNT(*) FROM $table WHERE user_id = ?");
+		$stmt = $this->db->prepare("SELECT COUNT(*) FROM $table WHERE studentID = ?");
 		$stmt->execute([$user_id]);
 		$count = $stmt->fetch(PDO::FETCH_COLUMN);
 		return $count;
@@ -1178,6 +1178,21 @@ class Database
 		try {
 			$que = $this->db->prepare("SELECT * FROM $tab WHERE $col = ?");
 			$que->execute([$aid]);
+			$arr = $que->rowCount();
+			return $arr;
+			$que = null;
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	//count column with where condition
+	public function count_it_from($tab, $col, $val1,$col2,$val2)
+	{
+		try {
+			$que = $this->db->prepare("SELECT * FROM $tab WHERE $col = ? AND $col2 = ?");
+			$que->execute([$val1,$val2]);
 			$arr = $que->rowCount();
 			return $arr;
 			$que = null;

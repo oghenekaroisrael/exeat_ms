@@ -30,8 +30,8 @@ if(!isset($_SESSION['userSession'])){
             <div class="col-md-12 grid-margin">
               <div class="row">
                 <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                  <h3 class="font-weight-bold">Welcome Triumph</h3>
-                  <h6 class="font-weight-normal mb-0"> You have <span class="text-primary">3 unread Notifications!</span></h6>
+                  <h3 class="font-weight-bold">Welcome <?php echo $fullname;?></h3>
+                  <h6 class="font-weight-normal mb-0"> You have <span class="text-primary"><?php echo Database::getInstance()->count_notifications($user_id); ?> unread Notifications!</span></h6>
                 </div>
                 <div class="col-12 col-xl-4">
                  <div class="justify-content-end d-flex">
@@ -70,7 +70,7 @@ if(!isset($_SESSION['userSession'])){
                   <div class="card card-tale">
                     <div class="card-body">
                       <p class="mb-4">Total Exeat Applications</p>
-                      <p class="fs-30 mb-2">10</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_it("Applications","studentID",$user_id); ?></p>
                       <!-- <p>10.00% (30 days)</p> -->
                     </div>
                   </div>
@@ -79,7 +79,7 @@ if(!isset($_SESSION['userSession'])){
                   <div class="card card-dark-blue">
                     <div class="card-body">
                       <p class="mb-4">Total Approved Applications</p>
-                      <p class="fs-30 mb-2">3</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_it_from("Applications","studentID",$user_id,"status",1); ?></p>
                       <!-- <p>22.00% (30 days)</p> -->
                     </div>
                   </div>
@@ -90,7 +90,7 @@ if(!isset($_SESSION['userSession'])){
                   <div class="card card-light-blue">
                     <div class="card-body">
                       <p class="mb-4">Total Declined Applications</p>
-                      <p class="fs-30 mb-2">7</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_it_from("Applications","studentID",$user_id,"status",2); ?></p>
                       <!-- <p>2.00% (30 days)</p> -->
                     </div>
                   </div>
@@ -98,8 +98,8 @@ if(!isset($_SESSION['userSession'])){
                 <div class="col-md-6 stretch-card transparent">
                   <div class="card card-light-danger">
                     <div class="card-body">
-                      <p class="mb-4">Something else</p>
-                      <p class="fs-30 mb-2">0</p>
+                      <p class="mb-4">Total Pending Applications</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_it_from("Applications","studentID",$user_id,"status",0); ?></p>
                       <!-- <p>0.22% (30 days)</p> -->
                     </div>
                   </div>

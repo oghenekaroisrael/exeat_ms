@@ -9,7 +9,6 @@ if(!isset($_SESSION['userSession'])){
   exit;
 }elseif (isset($_SESSION['userSession'])){
   $user_id = $_SESSION['userSession'];
-  $fullname = Database::getInstance()->get_fullname_by_id($user_id);
 }
 ?>
 <!DOCTYPE html>
@@ -57,6 +56,9 @@ if(!isset($_SESSION['userSession'])){
                           Reason
                         </th>
                         <th>
+                          Progress
+                        </th>
+                        <th>
                           Status
                         </th>
                         <th>
@@ -65,37 +67,53 @@ if(!isset($_SESSION['userSession'])){
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>
-                          1
-                        </td>
-                        <td>
-                          06-10-2021
-                        </td>
-                        <td>
-                          Lagos
-                        </td>
-                        <td>
-                          Long
-                        </td>
-                        <td>
-                          10-10-2021
-                        </td>
-                        <td>
-                          21-10-2021
-                        </td>
-                        <td>
-                          Lorem ipsum.
-                        </td>
-                        <td>
-                          <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                        </td>
-                        <td>
-                          <a href="viewApplication" class="btn btn-primary">View</a>
-                        </td>
-                      </tr>
+                      <?php 
+                      $counter = 0;
+                          $list = Database::getInstance()->select_from_where2("Applications","studentID",$user_id);
+                          foreach ($list as $app) {?>
+                            <tr>
+                              <td>
+                                <?php echo ++$counter;?>
+                              </td>
+                              <td>
+                              <?php echo $app['dateCreated'];?>
+                              </td>
+                              <td>
+                              <?php echo $app['destination'];?>
+                              </td>
+                              <td>
+                                <div class="badge badge-primary">
+                                  <?php echo $app['leave_type'];?>
+                                </div>
+                              </td>
+                              <td>
+                              <?php echo $app['depatureDate'];?>
+                              </td>
+                              <td>
+                              <?php echo $app['returnDate'];?>
+                              </td>
+                              <td>
+                              <?php echo $app['reason'];?>
+                              </td>
+                              <td>
+                              <?php 
+                                $status = $app['status'];
+                                $guardianApproval = $app['guardianApproval'];
+                                $progress = ($status < 2) ? (intval($status) + intval($guardianApproval)) : 0;
+                              ?>
+                                <div class="progress">
+                                  <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $progress;?>%" aria-valuenow="<?php echo $progress;?>" aria-valuemin="0" aria-valuemax="2"></div>
+                                </div>
+                              </td>
+                              <td>
+                                <span class="badge badge-info">Pending</span>
+                              </td>
+                              <td>
+                                <a href="viewApplication?id=<?php echo $app['applicationID'];?>" class="btn btn-primary">View</a>
+                              </td>
+                            </tr>
+                          <?}
+                      ?>
                     </tbody>
                   </table>
                 </div>
