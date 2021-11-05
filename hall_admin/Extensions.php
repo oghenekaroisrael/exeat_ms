@@ -1,3 +1,18 @@
+<?php
+ob_start();
+session_start();
+$active_page = "extensions";
+// Include database class
+include_once '../inc/db.php';
+if (!isset($_SESSION['userSession'])) {
+    header("Location: ../index");
+    exit;
+} elseif (isset($_SESSION['userSession'])) {
+    $user_id = $_SESSION['userSession'];
+
+}
+$hall_id = $_SESSION['HallID'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include('inc/header.php'); ?>
@@ -5,7 +20,7 @@
 <body>
     <div class="container-scroller">
         <!-- partial:partials/_navbar.html -->
-        <?php include('../partials/_navbar.html'); ?>
+        <?php include('inc/_navbar.php'); ?>
         <!-- partial -->
         <div class="../container-fluid page-body-wrapper">
             <!-- partial:partials/_sidebar.html -->
@@ -26,16 +41,13 @@
                                                         S/N
                                                     </th>
                                                     <th>
-                                                        Application Date
+                                                        Extension Date
                                                     </th>
                                                     <th>
                                                         Destination
                                                     </th>
                                                     <th>
-                                                        Leave Type
-                                                    </th>
-                                                    <th>
-                                                        Departure Date
+                                                        Exeat Type
                                                     </th>
                                                     <th>
                                                         Return Date
@@ -52,35 +64,48 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr>
+                                                <?php 
+                                                $sn = 1;
+                                                    $records = Database::getInstance()->select_Extensions($hall_id);
+                                                    foreach ($records as $record) { ?>
+                                                        <tr>
                                                     <td>
-                                                        1
+                                                        
                                                     </td>
                                                     <td>
-                                                        06-10-2021
+                                                        <?php echo date_format(date_create($record['dateCreated']),"d M Y H:i:s"); ?>
                                                     </td>
                                                     <td>
-                                                        Lagos
+                                                        <?php echo $record['destination']; ?>
                                                     </td>
                                                     <td>
-                                                        Long
+                                                        <?php echo $record['leave_type']; ?>
                                                     </td>
                                                     <td>
-                                                        10-10-2021
+                                                        <?php echo date_format(date_create($record['returnDate']),"d M Y H:i:s"); ?>
                                                     </td>
                                                     <td>
-                                                        21-10-2021
+                                                    <?php echo $record['reason']; ?>
                                                     </td>
                                                     <td>
-                                                        Lorem ipsum.
-                                                    </td>
-                                                    <td>
+                                                    <?php
+                                                            if ($record['status'] == 0 && $record['guardianApproval'] == 0) { ?>
                                                         <span class="badge badge-warning">Pending</span>
+                                                        <?php }else if ($record['status'] == 0 && $record['guardianApproval'] == 1) { ?>
+                                                        <span class="badge badge-info">Processing</span>
+                                                        <?php } else if ($record['status'] == 1 && $record['guardianApproval'] == 1) { ?>
+                                                        <span class="badge badge-success">Approved</span>
+                                                        <?php } else { ?>
+                                                        <span class="badge badge-danger">Declined</span>
+                                                        <?php  }
+                                                            ?>
                                                     </td>
                                                     <td>
-                                                        <a href="viewExtension" class="btn btn-primary">View</a>
+                                                        <a href="viewExtension?id=<?php echo $record['extensionID']; ?>" class="btn btn-primary">View</a>
                                                     </td>
                                                 </tr>
+                                                   <?php }
+                                                ?>
                                             </tbody>
                                         </table>
                                     </div>

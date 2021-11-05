@@ -1,7 +1,7 @@
 <?php
 ob_start();
 session_start(); 
-$active_page = "dashboard";
+$active_page = "applications";
 // Include database class
 include_once '../inc/db.php';
 if(!isset($_SESSION['userSession'])){
@@ -17,7 +17,7 @@ if(!isset($_SESSION['userSession'])){
 <body>
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-    <?php include('../partials/_navbar.html'); ?>
+    <?php include('inc/_navbar.php'); ?>
     <!-- partial -->
     <div class="../container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->

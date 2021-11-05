@@ -8,10 +8,15 @@ switch ($functionto) {
     
 	case "editProfile":
 		editProfile();
-        break;	
-	
-	case "updateBulletin":
-		updateBulletin();
+        break;
+	case "editDepartment":
+		editDepartment();
+		break;
+	case "editHall":
+		editHall();
+		break;
+	case 'editChapel':
+		editChapel();
 		break;
 	case 'updateCourse':
 		updateCourse();
@@ -1478,6 +1483,108 @@ function SendtoAcc(){
 			}
 		}
 	}
+
+	function editDepartment(){
+		$name = ucfirst(htmlspecialchars($_POST['department']));
+		$name = ucfirst(stripslashes($_POST['department']));
+		$name = ucfirst(trim(ucfirst($_POST['department'])));
+		$val = $_POST['val'];
+		
+		$error = '';
+		$validator = new FormValidator();
+						
+		$validator->addValidation("department","req","Please ENTER Department name");
+									
+		if($validator->ValidateForm()){
+			if (EMPTY($name)) {
+				$error ='Department cannot be empty';
+			}
+
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$insert = Database::getInstance()->edit_Department($name,$val);
+					echo $insert;
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
+
+	function editHall(){
+		$name = ucfirst(htmlspecialchars($_POST['hall']));
+		$name = ucfirst(stripslashes($_POST['hall']));
+		$name = ucfirst(trim(ucfirst($_POST['hall'])));
+		$val = $_POST['val'];
+		
+		$error = '';
+		$validator = new FormValidator();
+						
+		$validator->addValidation("hall","req","Please ENTER hall name");
+									
+		if($validator->ValidateForm()){
+			if (EMPTY($name)) {
+				$error ='hall cannot be empty';
+			}
+
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$insert = Database::getInstance()->edit_hall($name,$val);
+					echo $insert;
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
+
+	function editChapel(){
+		$name = ucfirst(htmlspecialchars($_POST['chapel']));
+		$name = ucfirst(stripslashes($_POST['chapel']));
+		$name = ucfirst(trim(ucfirst($_POST['chapel'])));
+		$val = $_POST['val'];
+		
+		$error = '';
+		$validator = new FormValidator();
+						
+		$validator->addValidation("chapel","req","Please ENTER chapel name");
+									
+		if($validator->ValidateForm()){
+			if (EMPTY($name)) {
+				$error ='chapel cannot be empty';
+			}
+
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$insert = Database::getInstance()->edit_chapel($name,$val);
+					echo $insert;
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
 	
 	
 	function editCat(){
@@ -2007,84 +2114,73 @@ function SendtoAcc(){
 		}
 	}
 
-	function editStaff(){	
-		$first_name = trim(ucfirst($_POST['first_name']));
-		$first_name = htmlspecialchars(ucfirst($_POST['first_name']));
-		$first_name = stripslashes(ucfirst($_POST['first_name']));
-			
-		$last_name = trim(ucfirst($_POST['last_name']));
-		$last_name = htmlspecialchars(ucfirst($_POST['last_name']));
-		$last_name = stripslashes(ucfirst($_POST['last_name']));
-			
-		$username = trim(lcfirst($_POST['username']));
-		$username = htmlspecialchars(lcfirst($_POST['username']));
-		$username = stripslashes(lcfirst($_POST['username']));
+	function editStaff(){
+		$first = ucfirst(htmlspecialchars($_POST['f_name']));
+		$first = ucfirst(stripslashes($_POST['f_name']));
+		$first = ucfirst(trim($_POST['f_name']));
 		
-		$position = trim(lcfirst($_POST['position']));
-		$position = htmlspecialchars(lcfirst($_POST['position']));
-		$position = stripslashes(lcfirst($_POST['position']));
-			
-		$role = lcfirst(htmlspecialchars($_POST['role']));
-		$role = lcfirst(stripslashes($_POST['role']));
-		$role = lcfirst(trim($_POST['role']));
+		$middle = ucfirst(htmlspecialchars($_POST['m_name']));
+		$middle = ucfirst(stripslashes($_POST['m_name']));
+		$middle = ucfirst(trim($_POST['m_name']));
 
-		$ward = lcfirst(htmlspecialchars($_POST['ward']));
-		$ward = lcfirst(stripslashes($_POST['ward']));
-		$ward = lcfirst(trim($_POST['ward']));
-			
-		$password = htmlspecialchars($_POST['password']);
-		$password = stripslashes($_POST['password']);
-		$password = trim($_POST['password']);
+		$last = ucfirst(htmlspecialchars($_POST['l_name']));
+		$last = ucfirst(stripslashes($_POST['l_name']));
+		$last = ucfirst(trim($_POST['l_name']));
 		
-		$cpass = htmlspecialchars($_POST['cpass']);
-		$cpass = stripslashes($_POST['cpass']);
-		$cpass = trim($_POST['cpass']);
-			
+		$mypassword = htmlspecialchars($_POST['password']);
+		$mypassword = stripslashes($_POST['password']);
+		$mypassword = trim($_POST['password']);
+		
+		$cpassword = htmlspecialchars($_POST['c_password']);
+		$cpassword = stripslashes($_POST['c_password']);
+		$cpassword = trim($_POST['c_password']);
+
 		$val = $_POST['val'];
-		$uploaderror = "";
-		
+		$table = $_POST['table'];
+
+		$error = '';
+
 		$validator = new FormValidator();
-								
-		$validator->addValidation("first_name","req","Please fill in first name");
-		$validator->addValidation("last_name","req","Please fill in last name");
-		$validator->addValidation("username","req","Please fill in username");
-		$validator->addValidation("role","req","Please fill in role");
-		
+						
+		$validator->addValidation("f_name","req","Please fill in first name");
+		$validator->addValidation("l_name","req","Please fill in last name");
 									
 		if($validator->ValidateForm()){
-			if (!preg_match("/^[A-Z][a-zA-Z -]+$/",$first_name)) {
+			if (!preg_match("/^[A-Z][a-zA-Z -]+$/",$first)) {
 				$error = 'First Name must contain only letters.';
 			}
 										
-			if (!preg_match("/^[A-Z][a-zA-Z -]+$/",$last_name)) {
+			if (!preg_match("/^[A-Z][a-zA-Z -]+$/",$last)) {
 				$error ='Last Name must contain only letters.';
 			}
 			
-			
-			//for password
-			//check if password is empty
-			if($password == "" || $cpass == ""){
-				//get teh value from db
-				$hash = Database::getInstance()->select_pass($val);
-			} else {
-				$hash = password_hash($password, PASSWORD_DEFAULT);
+			if (EMPTY($first)) {
+				$error ='First name cannot be empty';
+			}
+
+			if (EMPTY($last)) {
+				$error ='Last name cannot be empty';
+			}
+
+			if (!empty($mypassword) && !empty($cpassword) && $mypassword != $cpassword){
+				$error = "Password Do Not Match";
 			}
 			
-			$insert =  Database::getInstance()->edit_staff($first_name, $last_name, $username, $role, $hash, $position, $val,$ward);
-				
-			if($insert == 'Done'){
-				echo '<div class="alert alert-success">
-						Staff updated
-						</div>';
+			
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
 			}else{
+				$hash = (!empty($mypassword) && !empty($cpassword) && $mypassword != $cpassword) ? password_hash($mypassword, PASSWORD_DEFAULT) : NULL ;
+				$insert = Database::getInstance()->edit_staff($first,$middle, $last, $hash,$val,$table);
 				echo $insert;
 			}
-	
-		}else{
+		} else {
 			$error_hash = $validator->GetErrors();
 			foreach($error_hash as $inpname => $inp_err){
 				echo '<div class="alert alert-danger">
-						' . $inp_err . '
+					<strong>Warning!</strong> ' . $inp_err . '
 				</div>';
 			}
 		}

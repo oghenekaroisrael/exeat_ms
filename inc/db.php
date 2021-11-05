@@ -520,11 +520,35 @@ class Database
 			echo 'Error: ' . $e->getMessage();
 		}
 	}
-	public function select_Applications($user_id)
+	public function select_Applications($hall_id=null,$dept=null,$status=null)
 	{
 		try {
-			$que = $this->db->prepare("SELECT S.hall_id,A.destination AS destination, A.leave_type AS leave_type,A.applicationID AS applicationID, A.depatureDate as depature_date, A.returnDate as return_date, A.reason AS reason, A.status AS status ,A.dateCreated AS dateCreated FROM Students S LEFT JOIN Applications A ON S.id = A.studentID WHERE S.hall_id =? AND A.status IS NOT NULL;");
-			$que->execute([$user_id]);
+			if ($status == null && $hall_id != null && $dept == null) {
+				$que = $this->db->prepare("SELECT S.hall_id,A.destination AS destination, A.leave_type AS leave_type,A.applicationID AS applicationID, A.depatureDate as depature_date, A.returnDate as return_date, A.reason AS reason, A.status AS status ,A.dateCreated AS dateCreated, A.guardianApproval AS guardianApproval,A.dateReturned,A.dayLeft FROM Students S LEFT JOIN Applications A ON S.id = A.studentID WHERE S.hall_id = ? AND A.status IS NOT NULL;");
+				$que->execute([$hall_id]);
+				$arr = $que->fetchAll();
+			}else if ($status != null && $hall_id == null && $dept != null){
+				$que = $this->db->prepare("SELECT S.hall_id,A.destination AS destination, A.leave_type AS leave_type,A.applicationID AS applicationID, A.depatureDate as depature_date, A.returnDate as return_date, A.reason AS reason, A.status AS status ,A.dateCreated AS dateCreated, A.guardianApproval AS guardianApproval,A.dateReturned,A.dayLeft FROM Students S LEFT JOIN Applications A ON S.id = A.studentID WHERE S.department_id = ? AND A.status = ?;");
+				$que->execute([$dept,$status]);
+				$arr = $que->fetchAll();
+			}else if ($status != null && $hall_id == null && $dept == null){
+				$que = $this->db->prepare("SELECT S.hall_id,A.destination AS destination, A.leave_type AS leave_type,A.applicationID AS applicationID, A.depatureDate as depature_date, A.returnDate as return_date, A.reason AS reason, A.status AS status ,A.dateCreated AS dateCreated, A.guardianApproval AS guardianApproval,A.dateReturned,A.dayLeft FROM Students S LEFT JOIN Applications A ON S.id = A.studentID WHERE  A.status = ?;");
+				$que->execute([$status]);
+				$arr = $que->fetchAll();
+			}
+			return $arr;
+			$que = null;
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function select_Extensions($hall_id)
+	{
+		try {
+			$que = $this->db->prepare("SELECT S.hall_id,E.destination AS destination, E.extensionID as extensionID, E.leave_type AS leave_type,E.applicationID AS applicationID, E.returnDate as return_date, E.reason AS reason, E.status AS status ,E.dateCreated AS dateCreated, E.guardianApproval AS guardianApproval FROM Students S LEFT JOIN Extensions E ON S.id = E.studentID WHERE S.hall_id = ? AND E.status IS NOT NULL;");
+			$que->execute([$hall_id]);
 			$arr = $que->fetchAll();
 			return $arr;
 			$que = null;
@@ -1071,6 +1095,43 @@ class Database
 		}
 	}
 
+	
+	public function insert_staff($first,$middle, $last, $email, $role, $hash,$chapel,$hall, $department,$pnumber)
+	{
+		try {
+			if ($role == 'hall_admin') {
+				$stmt = $this->db->prepare("INSERT INTO Hall_Admins(firstName,middleName,lastName,email,hall_id,phoneNumber,createdAt) 
+				VALUES (?,?,?,?,?,?,NOW())");
+				$stmt->execute([$first, $middle, $last, $email,$hall,$pnumber]);
+				$stmt = null;
+			} else if ($role == 'department') {
+				$stmt = $this->db->prepare("INSERT INTO DepartmentStaffs(firstName,middleName,lastName,email,department_id,phoneNumber,createdAt) 
+				VALUES (?,?,?,?,?,?,NOW())");
+				$stmt->execute([$first, $middle, $last, $email,$department,$pnumber]);
+				$stmt = null;
+			} else if ($role == 'chapel') {
+				$stmt = $this->db->prepare("INSERT INTO ChapelStaffs(firstName,middleName,lastName,email,chapel_id,phoneNumber,createdAt) 
+				VALUES (?,?,?,?,?,?,NOW())");
+				$stmt->execute([$first, $middle, $last, $email,$chapel,$pnumber]);
+				$stmt = null;
+			} else {
+				$stmt = $this->db->prepare("INSERT INTO SecurityStaffs(firstName,middleName,lastName,email,phoneNumber,createdAt) 
+				VALUES (?,?,?,?,?,NOW())");
+				$stmt->execute([$first, $middle, $last, $email,$pnumber]);
+				$stmt = null;
+			}
+				
+			$stmt = $this->db->prepare("INSERT INTO Users(email,`password`,`role`,createdAt,updatedAt) 
+			VALUES (?,?,?,NOW(),NOW())");
+			$stmt->execute([$email, $hash, $role]);
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
 
 	//For user registration
 	public function insert_user($first, $middle, $last, $email, $role, $hash, $chapel, $hall, $department, $matricNumber, $level, $pnumber)
@@ -1117,6 +1178,29 @@ class Database
 		}
 	}
 
+	public function exeat_extension($type,$destination, $to, $reason, $user,$app)
+	{
+		try {
+			$stmt = $this->db->prepare("INSERT INTO Extensions(`studentID`, `leave_type`, `destination`, `returnDate`, `reason`,`applicationID`,`status`, `dateCreated`) 
+			VALUES (?,?,?,?,?,?,0,NOW())");
+			$stmt->execute([$user, $type, $destination, $to, $reason,$app]);
+
+			$stmt = null;
+
+			$msg = "New Extension";
+			$link = "Extensions";
+			$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+			VALUES (?,?,'hall_admin',?,0,NOW())");
+			$stmt->execute([$msg, $link, $user]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
 	//For user registration
 	public function insert_account($b_name, $a_name, $a_number, $user)
 	{
@@ -1124,6 +1208,108 @@ class Database
 			$stmt = $this->db->prepare("INSERT INTO accounts(bank_name,account_name,account_number,user_id) 
 			VALUES (?,?,?,?)");
 			$stmt->execute([$b_name, $a_name, $a_number, $user]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function insert_comment($comment,$user,$val)
+	{
+		try {
+			$stmt = $this->db->prepare("INSERT INTO Comments(Comment,ApplicationID,Comment_by) 
+			VALUES (?,?,?)");
+			$stmt->execute([$comment,$val,$user]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function insert_hall($hall)
+	{
+		try {
+			$stmt = $this->db->prepare("INSERT INTO Halls(hallName) 
+			VALUES (?)");
+			$stmt->execute([$hall]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function insert_chapel($chapel)
+	{
+		try {
+			$stmt = $this->db->prepare("INSERT INTO Chapels(chapelName) 
+			VALUES (?)");
+			$stmt->execute([$chapel]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function insert_department($department)
+	{
+		try {
+			$stmt = $this->db->prepare("INSERT INTO Departments(departmentName) 
+			VALUES (?)");
+			$stmt->execute([$department]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function edit_Department($department,$val)
+	{
+		try {
+			$stmt = $this->db->prepare("UPDATE Departments SET departmentName = ? WHERE id = ?");
+			$stmt->execute([$department,$val]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function edit_Hall($name,$val)
+	{
+		try {
+			$stmt = $this->db->prepare("UPDATE Halls SET hallName = ? WHERE id = ?");
+			$stmt->execute([$name,$val]);
+
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function edit_Chapel($name,$val)
+	{
+		try {
+			$stmt = $this->db->prepare("UPDATE Chapels SET chapelName = ? WHERE id = ?");
+			$stmt->execute([$name,$val]);
 
 			$stmt = null;
 			return "Done";
@@ -1200,6 +1386,27 @@ class Database
 		}
 	}
 
+
+	public function count_for_d($department,$status=10,$col)
+	{
+		try {
+			if ($status == 10) {
+				$que = $this->db->prepare("SELECT * FROM `Applications` a LEFT JOIN `Students`s ON a.studentID = s.id WHERE s.$col = ?;");
+				$que->execute([$department]);
+				$arr = $que->rowCount();
+			}else{
+				$que = $this->db->prepare("SELECT * FROM `Applications` a LEFT JOIN `Students`s ON a.studentID = s.id WHERE s.$col = ? AND a.status = ?;");
+				$que->execute([$department,$status]);
+				$arr = $que->rowCount();
+			}
+			return $arr;
+			$que = null;
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
 	//count column with where condition
 	public function count_it_from($tab, $col, $val1,$col2,$val2)
 	{
@@ -1262,10 +1469,11 @@ class Database
 		}
 	}
 
-	public function alterStatus($app_id,$status,$user)
+	public function alterStatus($app_id,$status,$user,$table)
 	{
 		try {
-			$stmt = $this->db->prepare("UPDATE Applications SET `status` = ?, alteredBy = ?, date_altered = NOW() WHERE applicationID = ?");
+			if ($table == 'Applications') {
+				$stmt = $this->db->prepare("UPDATE Applications SET `status` = ?, alteredBy = ?, date_altered = NOW() WHERE applicationID = ?");
 			$stmt->execute([$status, $user,$app_id]);
 			$stmt = null;
 			if ($status == 1) {
@@ -1285,6 +1493,108 @@ class Database
 				$stmt->execute([$msg, $link, $to]);
 				$stmt = null;
 			}
+			} else {
+				$stmt = $this->db->prepare("UPDATE Extensions SET `status` = ?, alteredBy = ?, date_altered = NOW() WHERE extensionID = ?");
+			$stmt->execute([$status, $user,$app_id]);
+			$stmt = null;
+			if ($status == 1) {
+				$msg = "Extension Approved";
+				$link = "viewApplication?id=".$app_id;
+				$to = $this->get_name_from_id('studentID', 'Extensions', 'extensionID', $app_id);
+				$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+				VALUES (?,?,?,'admin',0,NOW())");
+				$stmt->execute([$msg, $link, $to]);
+				$stmt = null;
+			} else if($status == 2) {
+				$msg = "Extension Declined";
+				$link = "viewApplication?id=".$app_id;
+				$to = $this->get_name_from_id('studentID', 'Extensions', 'extensionID', $app_id);
+				$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+				VALUES (?,?,?,'admin',0,NOW())");
+				$stmt->execute([$msg, $link, $to]);
+				$stmt = null;
+			}
+			}
+			
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function leavingStatus($app_id,$status,$user)
+	{
+		try {
+			if ($status == 1) {
+				$stmt = $this->db->prepare("UPDATE Applications SET `dayLeft` = NOW(), leavingSecurityID = ? WHERE applicationID = ?");
+			} else if($status == 2) {
+				$stmt = $this->db->prepare("UPDATE Applications SET `dateReturned` = NOW(), returningSecurityID = ? WHERE applicationID = ?");
+			}
+			$stmt->execute([$user,$app_id]);
+			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function GuardianApproval($app_id,$status,$user,$table)
+	{
+		try {
+			if ($table == 'Applications') {
+				if ($status == 1) {
+					$stmt = $this->db->prepare("UPDATE Applications SET `guardianApproval` = ?, alteredBy = ?, date_altered = NOW() WHERE applicationID = ?");
+					$stmt->execute([$status, $user,$app_id]);
+					$stmt = null;
+	
+					$msg = "Your Guardian Approved Your Application";
+					$link = "viewApplication?id=".$app_id;
+					$to = $this->get_name_from_id('studentID', 'Applications', 'ApplicationID', $app_id);
+					$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+					VALUES (?,?,?,'admin',0,NOW())");
+					$stmt->execute([$msg, $link, $to]);
+					$stmt = null;
+				} else if($status == 2) {
+					$stmt = $this->db->prepare("UPDATE Applications SET `guardianApproval` = ?,`status` = ?, alteredBy = ?, date_altered = NOW() WHERE applicationID = ?");
+					$stmt->execute([$status,$status, $user,$app_id]);
+					$stmt = null;
+					$msg = "Your Guardian Declined Your Application";
+					$link = "viewApplication?id=".$app_id;
+					$to = $this->get_name_from_id('studentID', 'Applications', 'ApplicationID', $app_id);
+					$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+					VALUES (?,?,?,'admin',0,NOW())");
+					$stmt->execute([$msg, $link, $to]);
+					$stmt = null;
+				}
+			} else {
+				if ($status == 1) {
+					$stmt = $this->db->prepare("UPDATE Extensions SET `guardianApproval` = ?, alteredBy = ?, date_altered = NOW() WHERE extensionID = ?");
+					$stmt->execute([$status, $user,$app_id]);
+					$stmt = null;
+	
+					$msg = "Your Guardian Approved Your Extension";
+					$link = "viewExtension?id=".$app_id;
+					$to = $this->get_name_from_id('studentID', 'Extensions', 'extensionID', $app_id);
+					$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+					VALUES (?,?,?,'admin',0,NOW())");
+					$stmt->execute([$msg, $link, $to]);
+					$stmt = null;
+				} else if($status == 2) {
+					$stmt = $this->db->prepare("UPDATE Extensions SET `guardianApproval` = ?,`status` = ?, alteredBy = ?, date_altered = NOW() WHERE extensionID = ?");
+					$stmt->execute([$status,$status, $user,$app_id]);
+					$stmt = null;
+					$msg = "Your Guardian Declined Your Extension";
+					$link = "viewExtension?id=".$app_id;
+					$to = $this->get_name_from_id('studentID', 'Extensions', 'extensionID', $app_id);
+					$stmt = $this->db->prepare("INSERT INTO Notifications(`message`,link,user_to,user_from,`status`,date_added) 
+					VALUES (?,?,?,'admin',0,NOW())");
+					$stmt->execute([$msg, $link, $to]);
+					$stmt = null;
+				}
+			}
+			
 			return "Done";
 		} catch (PDOException $e) {
 			// For handling error
@@ -1298,6 +1608,27 @@ class Database
 			$stmt = $this->db->prepare("UPDATE savings SET remark = ?, remark_by =?, date_remarked = NOW() WHERE id = ?");
 			$stmt->execute([$remark, $user, $saving_id]);
 			$stmt = null;
+			return "Done";
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function edit_staff($first,$middle, $last, $hash,$val,$table)
+	{
+		try {
+			$stmt = $this->db->prepare("UPDATE $table SET firstName = ?, middleName =?, lastName = ? WHERE id = ?");
+			$stmt->execute([$first,$middle, $last,$val]);
+			$stmt = null;
+
+			$email = $this->get_name_from_id('email',$table,'id',$val);
+			
+			if($hash != NULL){
+				$stmt = $this->db->prepare("UPDATE Users SET `password` = ? WHERE email = ?");
+				$stmt->execute([$hash,$email]);
+				$stmt = null;
+			}
 			return "Done";
 		} catch (PDOException $e) {
 			// For handling error
@@ -1344,10 +1675,22 @@ class Database
 					$_SESSION['userSession'] = $user_id;
 					$_SESSION['userRole'] = $role;
 					if ($role == 'student') {
-						$page = "student/dashboard.php";
+						$page = "student/dashboard";
 						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
 					} else if ($role == 'super-admin') {
-						$page = "admin/index.php";
+						$page = "admin/index";
+						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
+					} else if ($role == 'hall_admin') {
+						$page = "hall_admin/index";
+						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
+					} else if ($role == 'department') {
+						$page = "department/index";
+						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
+					} else if ($role == 'security') {
+						$page = "security/index";
+						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
+					} else if ($role == 'chapel') {
+						$page = "chapel/index";
 						echo json_encode(array("value" => $sign, "value2" => $loc, "value3" => $user_id, "page" => $page));
 					} else {
 						$result = "<div class='alert alert-danger'>Your Role is incorrect Kindly login accordingly !</div>";
@@ -1410,6 +1753,29 @@ class Database
 				ORDER BY a_user_id ASC");
 				$que->execute([$loaner, $surety]);
 				return $que;
+				$que = null;
+			}
+		} catch (PDOException $e) {
+			// For handling error
+			echo 'Error: ' . $e->getMessage();
+		}
+	}
+
+	public function get_report_from($from,$to,$hall_id=null)
+	{
+		try {
+			if ($hall_id == null) {
+				$que = $this->db->prepare("SELECT * FROM Applications WHERE depatureDate BETWEEN ? AND  ?
+				ORDER BY dateCreated DESC");
+				$que->execute([$from,$to]);
+				$row = $que->fetchAll();
+				return $row;
+				$que = null;
+			} else {
+				$que = $this->db->prepare("SELECT S.hall_id,S.lastName,S.firstName,S.middleName,A.* FROM Applications A RIGHT JOIN Students S ON S.id = A.StudentID WHERE A.applicationID IS NOT NULL AND S.hall_id = ? AND A.depatureDate BETWEEN ? AND ? ORDER BY A.dateCreated DESC");
+				$que->execute([$hall_id,$from,$to]);
+				$row = $que->fetchAll();
+				return $row;
 				$que = null;
 			}
 		} catch (PDOException $e) {

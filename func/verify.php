@@ -5,8 +5,8 @@
 	$functionto = $_POST['ins'];
 
 	switch ($functionto) {
-		case 'pushScores':
-			pushScores();
+		case 'leavingStatus':
+			leavingStatus();
 			break;
 		case 'addAccount':
 			addAccount();
@@ -26,8 +26,14 @@
 		case 'exeatApplication':
 			exeatApplication();
 			break;
+		case 'exeatExtension':
+			exeatExtension();
+			break;
 		case 'alterStatus':
 			alterStatus();
+			break;
+		case 'GuardianApproval':
+			GuardianApproval();
 			break;
 		case 'alterSavingsStatus':
 			alterSavingsStatus();
@@ -38,14 +44,26 @@
 		case "newUser":
 		   newUser();
 			break;
+		case 'newStaff':
+			newStaff();
+			break;
+		case 'newHall':
+			newHall();
+			break;
+		case 'newChapel':
+			newChapel();
+			break;
+		case 'newDepartment':
+			newDepartment();
+			break;
 		case "login":
 		   login();
 			break;
 		case "verify":
 			verify();
 			break;
-		case 'newRemark':
-			newRemark();
+		case 'newComment':
+			newComment();
 			break;
 		default:
 			echo '<div class="alert alert-danger">
@@ -159,6 +177,103 @@
 		}
 	}
 
+	function newStaff(){
+		$first = ucfirst(htmlspecialchars($_POST['f_name']));
+		$first = ucfirst(stripslashes($_POST['f_name']));
+		$first = ucfirst(trim($_POST['f_name']));
+		
+		$middle = ucfirst(htmlspecialchars($_POST['m_name']));
+		$middle = ucfirst(stripslashes($_POST['m_name']));
+		$middle = ucfirst(trim($_POST['m_name']));
+
+		$last = ucfirst(htmlspecialchars($_POST['l_name']));
+		$last = ucfirst(stripslashes($_POST['l_name']));
+		$last = ucfirst(trim($_POST['l_name']));
+		
+		$email = lcfirst(htmlspecialchars($_POST['email']));
+		$email = lcfirst(stripslashes($_POST['email']));
+		$email = lcfirst(trim($_POST['email']));
+		
+		$role = lcfirst(htmlspecialchars($_POST['role']));
+		$role = lcfirst(stripslashes($_POST['role']));
+		$role = lcfirst(trim($_POST['role']));
+
+		$department = lcfirst(htmlspecialchars($_POST['department']));
+		$department = lcfirst(stripslashes($_POST['department']));
+		$department = lcfirst(trim($_POST['department']));
+
+		$hall = lcfirst(htmlspecialchars($_POST['hall']));
+		$hall = lcfirst(stripslashes($_POST['hall']));
+		$hall = lcfirst(trim($_POST['hall']));
+
+		$chapel = lcfirst(htmlspecialchars($_POST['chapel']));
+		$chapel = lcfirst(stripslashes($_POST['chapel']));
+		$chapel = lcfirst(trim($_POST['chapel']));
+		
+		$mypassword = htmlspecialchars($_POST['password']);
+		$mypassword = stripslashes($_POST['password']);
+		$mypassword = trim($_POST['password']);
+
+		$pnumber = htmlspecialchars($_POST['phone_number']);
+		$pnumber = stripslashes($_POST['phone_number']);
+		$pnumber = trim($_POST['phone_number']);
+		
+		$cpassword = htmlspecialchars($_POST['c_password']);
+		$cpassword = stripslashes($_POST['c_password']);
+		$cpassword = trim($_POST['c_password']);
+		$error = '';
+
+		$validator = new FormValidator();
+						
+		$validator->addValidation("f_name","req","Please fill in first name");
+		$validator->addValidation("l_name","req","Please fill in last name");
+		$validator->addValidation("email","req","Please fill in your email");
+		$validator->addValidation("role","req","Please Select a Role");
+									
+		if($validator->ValidateForm()){
+			if (!preg_match("/^[A-Z][a-zA-Z -]+$/",$first)) {
+				$error = 'First Name must contain only letters.';
+			}
+										
+			if (!preg_match("/^[A-Z][a-zA-Z -]+$/",$last)) {
+				$error ='Last Name must contain only letters.';
+			}
+			if (!preg_match("/^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,3})+/",$email)){
+				$error = 'Email is not valid';
+			}
+			
+			if (EMPTY($first)) {
+				$error ='First name cannot be empty';
+			}
+
+			if (EMPTY($last)) {
+				$error ='Last name cannot be empty';
+			}
+
+			if ($mypassword != $cpassword){
+				$error = "Password Do Not Match";
+			}
+			
+			
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$hash = password_hash($mypassword, PASSWORD_DEFAULT);
+				$insert = Database::getInstance()->insert_staff($first,$middle, $last, $email, $role, $hash,$chapel,$hall, $department,$pnumber);
+				echo $insert;
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
+
 	function login(){
 		$uperror = '';
 		
@@ -211,14 +326,6 @@
 		
 		$user = $_POST['user'];
 		$type = $_POST['type'];
-		
-		//$validator = new FormValidator();
-						
-		//$validator->addValidation("username","req","Please fill in your username");
-		//$validator->addValidation("password","req","Please fill in Your password");
-									
-		//if($validator->ValidateForm()){
-		
 			if (empty($amount)) {
 				$uperror = '<div class="alert alert-danger">
 					<strong>Warning!</strong> Please logout and login.
@@ -227,16 +334,7 @@
 			
 			if ($amount > 0) {
 				echo Database::getInstance()->makePayment($amount,$user,$type);
-			}
-		
-		// } else {
-		// 	$error_hash = $validator->GetErrors();
-		// 	foreach($error_hash as $inpname => $inp_err){
-		// 		echo '<div class="alert alert-danger">
-		// 			<strong>Warning!</strong> ' . $inp_err . '
-		// 		</div>';
-		// 	}
-		// } 			
+			}			
 	}
 
 	function getPayable(){
@@ -347,7 +445,88 @@
 		}
 	}
 
+	function exeatExtension(){
+		$type = ucfirst(htmlspecialchars($_POST['type']));
+		$type = ucfirst(stripslashes($_POST['type']));
+		$type = ucfirst(trim($_POST['type']));
+		
+		$destination = ucfirst(htmlspecialchars($_POST['destination']));
+		$destination = ucfirst(stripslashes($_POST['destination']));
+		$destination = ucfirst(trim($_POST['destination']));
+		
+		$to = lcfirst(htmlspecialchars($_POST['returning']));
+		$to = lcfirst(stripslashes($_POST['returning']));
+		$to = lcfirst(trim($_POST['returning']));
+		
+		$reason = lcfirst(htmlspecialchars($_POST['reason']));
+		$reason = lcfirst(stripslashes($_POST['reason']));
+		$reason = lcfirst(trim($_POST['reason']));
+
+		$user = $_POST['user'];
+		$app = $_POST['app'];
+
+		$error = '';
+
+		$validator = new FormValidator();
+						
+		$validator->addValidation("type","req","Please Select Exeat Type");
+		$validator->addValidation("reason","req","Please fill in Purpose");		
+		$validator->addValidation("returning","req","Please fill in Expected Return Date");
+		if($validator->ValidateForm()){
+			
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$insert = Database::getInstance()->exeat_extension($type,$destination, $to, $reason, $user,$app);
+				echo $insert;
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
+	
+	function GuardianApproval(){
+		$uperror = '';
+		
+		$app_id = $_POST['app_id'];
+		$user = $_POST['user'];
+		$status = $_POST['status'];
+		$table = $_POST['table'];
+
+			if (empty($app_id)) {
+				$uperror = '<div class="alert alert-danger">
+					<strong>Warning!</strong> Please Reload Page.
+				</div>';
+			}else{
+				echo Database::getInstance()->GuardianApproval($app_id,$status,$user,$table);
+			}			
+	}
+
 	function alterStatus(){
+		$uperror = '';
+		
+		$app_id = $_POST['app_id'];
+		$user = $_POST['user'];
+		$status = $_POST['status'];
+		$table = $_POST['table'];
+
+			if (empty($app_id)) {
+				$uperror = '<div class="alert alert-danger">
+					<strong>Warning!</strong> Please Reload Page.
+				</div>';
+			}else{
+				echo Database::getInstance()->alterStatus($app_id,$status,$user,$table);
+			}			
+	}
+
+	function leavingStatus(){
 		$uperror = '';
 		
 		$app_id = $_POST['app_id'];
@@ -359,7 +538,7 @@
 					<strong>Warning!</strong> Please Reload Page.
 				</div>';
 			}else{
-				echo Database::getInstance()->alterStatus($app_id,$status,$user);
+				echo Database::getInstance()->leavingStatus($app_id,$status,$user);
 			}			
 	}
 
@@ -409,43 +588,19 @@
 			}
 	}
 
-	function newBulletin(){
-		$dept = ucfirst(htmlspecialchars($_POST['dept']));
-		$dept = ucfirst(stripslashes($_POST['dept']));
-		$dept = ucfirst(trim(ucfirst($_POST['dept'])));
-
-		$syear = ucfirst(htmlspecialchars($_POST['syear']));
-		$syear = ucfirst(stripslashes($_POST['syear']));
-		$syear = ucfirst(trim(ucfirst($_POST['syear'])));
-
-		$gyear = ucfirst(htmlspecialchars($_POST['gyear']));
-		$gyear = ucfirst(stripslashes($_POST['gyear']));
-		$gyear = ucfirst(trim(ucfirst($_POST['gyear'])));
-
-		$req = ucfirst(htmlspecialchars($_POST['req']));
-		$req = ucfirst(stripslashes($_POST['req']));
-		$req = ucfirst(trim(ucfirst($_POST['req'])));
-
-		$user = ucfirst(htmlspecialchars($_POST['user']));
-		$user = ucfirst(stripslashes($_POST['user']));
-		$user = ucfirst(trim(ucfirst($_POST['user'])));
-
-		$status = ucfirst(htmlspecialchars($_POST['status']));
-		$status = ucfirst(stripslashes($_POST['status']));
-		$status = ucfirst(trim(ucfirst($_POST['status'])));
+	function newHall(){
+		$hall = ucfirst(htmlspecialchars($_POST['hall']));
+		$hall = ucfirst(stripslashes($_POST['hall']));
+		$hall = ucfirst(trim(ucfirst($_POST['hall'])));
 		
 		$error = '';
-		// $validator = new FormValidator();
+		$validator = new FormValidator();
 						
-		// $validator->addValidation("req","req","Please ENTER graduation Requirements");
-		// $validator->addValidation("dept","req","Please SELECT Department");
-		// $validator->addValidation("syear","req","Please SELECT Entry Year");
-		// $validator->addValidation("gyear","req","Please SELECT graduation year");
-		// $validator->addValidation("user","req","Please LOGOUT and login Again");
+		$validator->addValidation("hall","req","Please ENTER Hall Name");
 									
-		// if($validator->ValidateForm()){
-			if (EMPTY($dept)) {
-				$error ='Department cannot be empty';
+		if($validator->ValidateForm()){
+			if (EMPTY($hall)) {
+				$error ='Hall cannot be empty';
 			}
 
 			if($error){
@@ -453,34 +608,117 @@
 					<strong>Warning!</strong> '. $error .' 
 				</div>';
 			}else{
-				$insert = Database::getInstance()->insert_bulletin($dept,$syear,$gyear,$req,$user,$status);
+				$insert = Database::getInstance()->insert_hall($hall);
 				if($insert == 'Done'){
 					echo '<div class="alert alert-success">
 					<button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
 					  <i class="fas fa-times"></i>
 					</button>
-					<span>Bulletin Added Successfully</span>
+					<span>Hall Added Successfully</span>
 				  </div>';
 				} else {
 					echo $insert;
 				}
 			}
-		// } else {
-		// 	$error_hash = $validator->GetErrors();
-		// 	foreach($error_hash as $inpname => $inp_err){
-		// 		echo '<div class="alert alert-danger">
-		// 			<strong>Warning!</strong> ' . $inp_err . '
-		// 		</div>';
-		// 	}
-		// }
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
 	}
 
-	function newRemark(){
-		$reason = ucfirst(htmlspecialchars($_POST['reason']));
-		$reason = ucfirst(stripslashes($_POST['reason']));
-		$reason = ucfirst(trim(ucfirst($_POST['reason'])));
+	function newChapel(){
+		$chapel = ucfirst(htmlspecialchars($_POST['chapel']));
+		$chapel = ucfirst(stripslashes($_POST['chapel']));
+		$chapel = ucfirst(trim(ucfirst($_POST['chapel'])));
+		
+		$error = '';
+		$validator = new FormValidator();
+						
+		$validator->addValidation("chapel","req","Please ENTER Hall Name");
+									
+		if($validator->ValidateForm()){
+			if (EMPTY($chapel)) {
+				$error ='Hall cannot be empty';
+			}
 
-		$matNumber = $_POST['matNumber'];
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$insert = Database::getInstance()->insert_chapel($chapel);
+				if($insert == 'Done'){
+					echo '<div class="alert alert-success">
+					<button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
+					  <i class="fas fa-times"></i>
+					</button>
+					<span>Chapel Added Successfully</span>
+				  </div>';
+				} else {
+					echo $insert;
+				}
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
+
+	function newDepartment(){
+		$department = ucfirst(htmlspecialchars($_POST['department']));
+		$department = ucfirst(stripslashes($_POST['department']));
+		$department = ucfirst(trim(ucfirst($_POST['department'])));
+		
+		$error = '';
+		$validator = new FormValidator();
+						
+		$validator->addValidation("department","req","Please ENTER Department Name");
+									
+		if($validator->ValidateForm()){
+			if (EMPTY($department)) {
+				$error ='department cannot be empty';
+			}
+
+			if($error){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> '. $error .' 
+				</div>';
+			}else{
+				$insert = Database::getInstance()->insert_department($department);
+				if($insert == 'Done'){
+					echo '<div class="alert alert-success">
+					<button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
+					  <i class="fas fa-times"></i>
+					</button>
+					<span>Department Added Successfully</span>
+				  </div>';
+				} else {
+					echo $insert;
+				}
+			}
+		} else {
+			$error_hash = $validator->GetErrors();
+			foreach($error_hash as $inpname => $inp_err){
+				echo '<div class="alert alert-danger">
+					<strong>Warning!</strong> ' . $inp_err . '
+				</div>';
+			}
+		}
+	}
+
+	function newComment(){
+		$comment = ucfirst(htmlspecialchars($_POST['comment']));
+		$comment = ucfirst(stripslashes($_POST['comment']));
+		$comment = ucfirst(trim(ucfirst($_POST['comment'])));
+
 		$val = $_POST['val'];
 		$user = $_POST['user'];
 		
@@ -488,14 +726,18 @@
 		// $validator = new FormValidator();
 						
 		// $validator->addValidation("req","req","Please ENTER graduation Requirements");
-		// $validator->addValidation("reason","req","Please SELECT Department");
+		// $validator->addValidation("comment","req","Please SELECT Department");
 		// $validator->addValidation("syear","req","Please SELECT Entry Year");
 		// $validator->addValidation("gyear","req","Please SELECT graduation year");
 		// $validator->addValidation("user","req","Please LOGOUT and login Again");
 									
 		// if($validator->ValidateForm()){
-			if (EMPTY($reason)) {
-				$error ='Reason cannot be empty';
+			if (EMPTY($comment)) {
+				$error ='comment cannot be empty';
+			}
+
+			if (EMPTY($val)) {
+				$error ='Application ID cannot be empty';
 			}
 
 			if($error){
@@ -503,17 +745,7 @@
 					<strong>Warning!</strong> '. $error .' 
 				</div>';
 			}else{
-				$insert = Database::getInstance()->insert_remark($reason,$matNumber,$user,$val);
-				if($insert == 'Done'){
-					echo '<div class="alert alert-success">
-					<button type="button" aria-hidden="true" class="close" data-dismiss="alert" aria-label="Close">
-					  <i class="fas fa-times"></i>
-					</button>
-					<span>Remark Sent Successfully</span>
-				  </div>';
-				} else {
-					echo $insert;
-				}
+				echo $insert = Database::getInstance()->insert_comment($comment,$user,$val);
 			}
 		// } else {
 		// 	$error_hash = $validator->GetErrors();

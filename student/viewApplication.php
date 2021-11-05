@@ -1,7 +1,7 @@
 <?php
 ob_start();
 session_start(); 
-$active_page = "dashboard";
+$active_page = "applications";
 // Include database class
 include_once '../inc/db.php';
 if(!isset($_SESSION['userSession'])){
@@ -18,7 +18,7 @@ if(!isset($_SESSION['userSession'])){
 <body>
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-    <?php include('../partials/_navbar.html'); ?>
+    <?php include('inc/_navbar.php'); ?>
     <!-- partial -->
     <div class="../container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
@@ -27,6 +27,7 @@ if(!isset($_SESSION['userSession'])){
       <div class="main-panel">
         <div class="content-wrapper">
           <div class="row">
+            
           <div class="col-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
@@ -51,15 +52,27 @@ if(!isset($_SESSION['userSession'])){
                         }
                   ?>
                   <div class="row">
-                      <div class="col-sm-12">
+                      <div class="col">
                       <?php 
-                            if ($data['status'] == 0) {?>
+                            if ($data['status'] == 0 && $data['guardianApproval'] == 0) {?>
                             <span class="badge badge-warning right">Pending</span>
-                            <?php } else if($data['status'] == 1){?>
+                            <?php }if ($data['status'] == 0 && $data['guardianApproval'] == 1) {?>
+                            <span class="badge badge-info right">Processing</span>
+                            <?php } else if($data['status'] == 1 && $data['guardianApproval'] == 1){?>
                                 <span class="badge badge-success right">Approved</span>
                             <?php }else {?>
                                 <span class="badge badge-danger right">Declined</span>
                             <?php } ?>
+                      </div>
+                    </div>
+                    <div class="row mt-3">
+                      <div class="col">
+                        <?php 
+                         $today = /*date('Y-m-d',strtotime('2021-11-07'));*/ date('Y-m-d');
+                            if ($today >=$data['returnDate'] && $data['status'] == 1 && $data['guardianApproval'] == 1) { ?>
+                              <a href="newExtension?id=<?php echo $app_id; ?>" class="btn btn-info">Apply For Extension</a>
+                           <?php }
+                        ?>
                       </div>
                     </div>
                     <div class="row">
@@ -173,7 +186,74 @@ if(!isset($_SESSION['userSession'])){
                         <span class="text-default"><?php echo $data['reason']; ?></span>
                       </div>
                     </div>
-                    <button type="button" class="btn btn-danger mr-2" >Cancel</button>
+                    <?php 
+                    $ext = Database::getInstance()->select_from_where2('Extensions','applicationID',$app_id);
+                    foreach ($ext as $extension) { ?>
+                      <div class="row mt-3">
+                      <div class="col pt-5 pb-5"  style="border-top:solid #000 1px;border-bottom:solid #000 1px;">
+                          <div class="container">
+                            <div class="row">
+                              <label class="col-sm-3 col-form-label">Reason For Extension</label>
+                              <div class="col-sm-9">
+                                <span class="text-default  mt-2"><?php echo $extension['reason']; ?></span>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <label class="col-sm-3 col-form-label">Date Applied</label>
+                              <div class="col-sm-9">
+                                <span class="text-default mt-2"><?php echo $extension['dateCreated']; ?></span>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <label class="col-sm-3 col-form-label">New Return Date</label>
+                              <div class="col-sm-9">
+                                <span class="text-default  mt-2"><?php echo $extension['returnDate']; ?></span>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <label class="col-sm-3 col-form-label">Guardian Approval Status</label>
+                              <div class="col-sm-9">
+                                <?php 
+                                    if ($extension['guardianApproval'] == 0 ){ ?>
+                                      <div class="badge badge-warning mt-2">Pending</div>
+                                   <?php }else if ($extension['guardianApproval'] == 1) { ?>
+                                      <div class="badge badge-success mt-2">Approved</div>
+                                   <?php }else { ?>
+                                      <div class="badge badge-danger mt-2">Declined</div>
+                                   <?php } ?>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <label class="col-sm-3 col-form-label">Status</label>
+                              <div class="col-sm-9">
+                              <?php 
+                                    if ($extension['guardianApproval'] == 0 && $extension['status'] == 0) { ?>
+                                      <div class="badge badge-warning mt-2">Pending</div>
+                                   <?php }else if ($extension['guardianApproval'] == 1 && $extension['status'] == 0) { ?>
+                                      <div class="badge badge-info mt-2">Processing</div>
+                                   <?php }else if ($extension['guardianApproval'] == 1 && $extension['status'] == 1) { ?>
+                                      <div class="badge badge-success mt-2">Approved</div>
+                                   <?php }else { ?>
+                                      <div class="badge badge-danger mt-2">Declined</div>
+                                   <?php } ?>
+                              </div>
+                            </div>
+
+                            <?php 
+                              if ($extension['guardianApproval'] == 0 && $extension['status'] == 0) { ?>
+                                <div class="row mb-3">
+                                  <div class="col">
+                                    <button class="btn btn-danger" onclick="delet(<?php echo $extension['extensionID']; ?>)">Delete Extension Application</button>
+                                  </div>
+                                </div>
+                             <?php } ?>
+                          </div>
+                      </div>
+                    </div>
+                    <?php }
+                        if ($data['status'] == 0 && $data['guardianApproval'] == 0) {?>
+                            <button type="button" class="btn btn-danger mr-2" >Cancel</button>
+                        <?php }?>
                     <a href="Applications" class="btn btn-light">Go Back</a>
                       <?php 
                       } ?>
@@ -181,7 +261,6 @@ if(!isset($_SESSION['userSession'])){
               </div>
             </div>
           </div>
-          
         </div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
@@ -202,6 +281,45 @@ if(!isset($_SESSION['userSession'])){
   <!-- container-scroller -->
 
  <?php include('inc/footer.php');?>
+  <script type="text/javascript">
+		var a=jQuery .noConflict();
+        var user = <?php echo $user_id; ?>;
+        a('#applicationForm').on('submit', function (e) {
+			e.preventDefault();
+				a.ajax({
+					type: 'POST',
+					url: '../func/verify.php',
+					data: a('#applicationForm').serialize() + '&ins=exeatApplication&user='+user,
+					success: function(response)
+					{
+            if (response === 'Done') {
+                window.location.href = 'Applications.php?s=yes';
+            } else {
+                console.log(response);
+            }
+					}
+				});
+		});
+
+    function delet(app_id) {
+          let confirm = window.confirm('Are You Sure You Want To Delete This Extension?');
+          if (confirm) {
+            a.ajax({
+              type: 'POST',
+              url: '../func/del.php',
+              data: 'ins=delExtension&val='+app_id,
+              success: function(response)
+              {
+                            if (response === 'Done') {
+                                window.location.href = 'viewApplication?id=<?php echo $app_id; ?>';
+                            } else {
+                                window.location.href = 'Applications?error=yes';
+                            }
+              }
+            });
+          }
+        }
+</script>
 </body>
 
 </html>

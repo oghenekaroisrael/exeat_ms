@@ -1,10 +1,25 @@
+<?php
+ob_start();
+session_start();
+$active_page = "reports";
+// Include database class
+include_once '../inc/db.php';
+if (!isset($_SESSION['userSession'])) {
+  header("Location: ../index");
+  exit;
+} elseif (isset($_SESSION['userSession'])) {
+  $user_id = $_SESSION['userSession'];
+
+}
+$hall_id = $_SESSION['HallID'];
+?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include('inc/header.php');?>
 <body>
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-    <?php include('../partials/_navbar.html'); ?>
+    <?php include('inc/_navbar.php'); ?>
     <!-- partial -->
     <div class="../container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
@@ -12,81 +27,24 @@
       <!-- partial -->
       <div class="main-panel">
         <div class="content-wrapper">
+          <h4>Reports</h4>
           <div class="row">
-          <div class="col-lg-12 grid-margin stretch-card">
-            <div class="card">
-              <div class="card-body">
-                <h4 class="card-title">My Applications</h4>
-                <div class="table-responsive">
-                  <table class="table table-striped">
-                    <thead>
-                      <tr>
-                        <th>
-                          S/N
-                        </th>
-                        <th>
-                          Application Date
-                        </th>
-                        <th>
-                          Destination
-                        </th>
-                        <th>
-                          Leave Type
-                        </th>
-                        <th>
-                          Departure Date
-                        </th>
-                        <th>
-                          Return Date
-                        </th>
-                        <th>
-                          Reason
-                        </th>
-                        <th>
-                          Status
-                        </th>
-                        <th>
-                        Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>
-                          1
-                        </td>
-                        <td>
-                          06-10-2021
-                        </td>
-                        <td>
-                          Lagos
-                        </td>
-                        <td>
-                          Long
-                        </td>
-                        <td>
-                          10-10-2021
-                        </td>
-                        <td>
-                          21-10-2021
-                        </td>
-                        <td>
-                          Lorem ipsum.
-                        </td>
-                        <td>
-                          <div class="progress">
-                            <div class="progress-bar bg-success" role="progressbar" style="width: 50%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                          </div>
-                        </td>
-                        <td>
-                        <a href="viewApplication" class="btn btn-primary">View</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+          <div class="col-lg-12">
+          <form class="forms-sample" action="Report.php" method="POST">
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Beginning Date</label>
+                      <div class="col-sm-9">
+                        <input type="date" class="form-control" name="from" placeholder="dd/mm/yyyy"/>
+                      </div>
+                    </div>
+                    <div class="form-group row">
+                      <label class="col-sm-3 col-form-label">Ending Date</label>
+                      <div class="col-sm-9">
+                        <input type="date" class="form-control" name="to" placeholder="dd/mm/yyyy"/>
+                      </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mr-2">Search</button>
+                  </form>
           </div>
           </div>
         </div>

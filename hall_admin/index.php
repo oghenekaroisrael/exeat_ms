@@ -1,10 +1,31 @@
+<?php
+ob_start();
+session_start();
+$active_page = "dashboard";
+// Include database class
+include_once '../inc/db.php';
+if (!isset($_SESSION['userSession'])) {
+    header("Location: ../index");
+    exit;
+} elseif (isset($_SESSION['userSession'])) {
+    $user_id = $_SESSION['userSession'];
+
+}
+$myemail = Database::getInstance()->get_name_from_id('email','Users','id',$user_id);
+$fln = Database::getInstance()->select_from_where2('Hall_Admins','email',$myemail);
+foreach ($fln as $fn) {
+   $fullname = $fn['lastName'].' '.$fn['middleName'].' '.$fn['firstName'];
+   $hall_id = $fn['hall_id'];
+   $_SESSION['HallID'] = $hall_id;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <?php include('inc/header.php');?>
 <body>
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-    <?php include('../partials/_navbar.html'); ?>
+    <?php include('inc/_navbar.php'); ?>
     <!-- partial -->
     <div class="../container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
@@ -16,7 +37,7 @@
             <div class="col-md-12 grid-margin">
               <div class="row">
                 <div class="col-12 col-xl-8 mb-4 mb-xl-0">
-                  <h3 class="font-weight-bold">Welcome Triumph</h3>
+                  <h3 class="font-weight-bold">Welcome <?php echo $fullname; ?></h3>
                   <h6 class="font-weight-normal mb-0"> You have <span class="text-primary">3 unread Notifications!</span></h6>
                 </div>
                 <div class="col-12 col-xl-4">
@@ -56,7 +77,7 @@
                   <div class="card card-tale">
                     <div class="card-body">
                       <p class="mb-4">Total Exeat Applications</p>
-                      <p class="fs-30 mb-2">10</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_for_d($hall_id,10,'hall_id'); ?></p>
                       <!-- <p>10.00% (30 days)</p> -->
                     </div>
                   </div>
@@ -65,7 +86,7 @@
                   <div class="card card-dark-blue">
                     <div class="card-body">
                       <p class="mb-4">Total Approved Applications</p>
-                      <p class="fs-30 mb-2">3</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_for_d($hall_id,1,'hall_id'); ?></p>
                       <!-- <p>22.00% (30 days)</p> -->
                     </div>
                   </div>
@@ -76,7 +97,7 @@
                   <div class="card card-light-blue">
                     <div class="card-body">
                       <p class="mb-4">Total Declined Applications</p>
-                      <p class="fs-30 mb-2">7</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_for_d($hall_id,2,'hall_id'); ?></p>
                       <!-- <p>2.00% (30 days)</p> -->
                     </div>
                   </div>
@@ -84,8 +105,8 @@
                 <div class="col-md-6 stretch-card transparent">
                   <div class="card card-light-danger">
                     <div class="card-body">
-                      <p class="mb-4">Something else</p>
-                      <p class="fs-30 mb-2">0</p>
+                      <p class="mb-4">Pending Applications</p>
+                      <p class="fs-30 mb-2"><?php echo Database::getInstance()->count_for_d($hall_id,0,'hall_id'); ?></p>
                       <!-- <p>0.22% (30 days)</p> -->
                     </div>
                   </div>

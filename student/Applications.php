@@ -1,7 +1,7 @@
 <?php
 ob_start();
 session_start(); 
-$active_page = "dashboard";
+$active_page = "applications";
 // Include database class
 include_once '../inc/db.php';
 if(!isset($_SESSION['userSession'])){
@@ -17,7 +17,7 @@ if(!isset($_SESSION['userSession'])){
 <body>
   <div class="container-scroller">
     <!-- partial:partials/_navbar.html -->
-    <?php include('../partials/_navbar.html'); ?>
+    <?php include('inc/_navbar.php'); ?>
     <!-- partial -->
     <div class="../container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
@@ -102,11 +102,22 @@ if(!isset($_SESSION['userSession'])){
                                 $progress = ($status < 2) ? (intval($status) + intval($guardianApproval)) : 0;
                               ?>
                                 <div class="progress">
-                                  <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo $progress;?>%" aria-valuenow="<?php echo $progress;?>" aria-valuemin="0" aria-valuemax="2"></div>
+                                  <div class="progress-bar bg-success" role="progressbar" style="width: <?php echo intval($progress)*50;?>%" aria-valuenow="<?php echo $progress;?>" aria-valuemin="0" aria-valuemax="2"></div>
                                 </div>
                               </td>
                               <td>
-                                <span class="badge badge-info">Pending</span>
+                                <?php 
+                                    if ($status == 0 && $guardianApproval == 0) { ?>
+                                      <span class="badge badge-warning">Pending</span>
+                                    <?php } else if ($status == 0 && $guardianApproval == 1) { ?>
+                                      <span class="badge badge-info">Processing</span>
+                                    <?php } else if ($status == 1 && $guardianApproval == 1) { ?>
+                                      <span class="badge badge-success">Approved</span>
+                                    <?php }else { ?>
+                                      <span class="badge badge-danger">Declined</span>
+                                   <?php }
+                                    
+                                ?>
                               </td>
                               <td>
                                 <a href="viewApplication?id=<?php echo $app['applicationID'];?>" class="btn btn-primary">View</a>
@@ -141,6 +152,26 @@ if(!isset($_SESSION['userSession'])){
   <!-- container-scroller -->
 
  <?php include('inc/footer.php');?>
+ <script type="text/javascript">
+		var a=jQuery .noConflict();
+        var user = <?php echo $user_id; ?>;
+        a('#searchParam').on('submit', function (e) {
+			e.preventDefault();
+				a.ajax({
+					type: 'POST',
+					url: '../func/verify.php',
+					data: a('#searchParam').serialize() + '&ins=exeatApplication&user='+user,
+					success: function(response)
+					{
+            if (response === 'Done') {
+                
+            } else {
+                console.log(response);
+            }
+					}
+				});
+		});
+</script>
 </body>
 </html>
 
